@@ -37,7 +37,21 @@ app.use('/api', RouterApi);
 const server = app.listen(5000, () => console.log(`http://localhost:5000/`));
 
 const wss = new ws.WebSocketServer({ server });
+
 wss.on('connection', (connection, req) => {
+
+    function notifyAboutOnlinePeople() {
+        [...wss.clients].forEach(client => {
+            client.send(JSON.stringify({
+                online: [...wss.clients].map(clie => ({
+                    userId: clie.userId,
+                    username: clie.username
+                }))
+            }
+            ))
+        })
+    }
+
     const cookies = req.headers.cookie;
     if (cookies) {
         const tokenCookieStr = cookies.split(';').find(str => str.startsWith('token='));
@@ -54,13 +68,15 @@ wss.on('connection', (connection, req) => {
         }
     }
 
-    [...wss.clients].forEach(client => {
-        client.send(JSON.stringify({
-            online: [...wss.clients].map(clie => ({
-                userId: clie.userId,
-                username: clie.username
-            }))
+    connection.on('message', (message) => {
+        const messageData = JSON.parse(message.toString());
+        const { recipient, text } = messageData;
+        if (recipient && text) {
+            [...wss.clients]
+                .filter(client => client.userId == recipient)
+                .forEach(clinet => clinet.send(JSON.stringify({ text, sender: connection.userId })));
         }
-        ))
     })
+
+    notifyAboutOnlinePeople();
 })

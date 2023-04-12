@@ -28,8 +28,8 @@
     flex: 1;
 }
 
-.register form input, 
-.register form button {
+.register .column-2 form input, 
+.register .column-2 form button {
     padding: 15px;
     margin: 5px;
     width: 100%;
