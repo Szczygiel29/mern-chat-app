@@ -12,7 +12,7 @@
     flex-direction: column;
 }
 
-.column-3 .user{
+.column-3 .user {
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 10px;
@@ -23,6 +23,38 @@
     font-family: "Poppins", sans-serif;
     font-size: 3rem;
     color: #007bff;
+    display: flex;
+    flex-direction: column;
+}
+
+.column-3 .logout-button {
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.column-3 .logout-button .logout-text {
+    font-family: "Poppins", sans-serif;
+    font-weight: bold;
+    margin: 20px;
+    font-size: large;
+}
+
+.column-3 .logout-button .btn {
+    border-radius: 25px;
+    border: 1px solid #007bff;
+    min-width: 20vh;
+    font-size: large;
+    border: none;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    width: 70px;
+    height: 56px;
+    margin-bottom: 30px;
 }
 
 .column-4 {
@@ -39,7 +71,7 @@
     width: 100%;
 }
 
-.messages .text{
+.messages .text {
     padding: 10px;
     height: 95%;
     width: 95%;
@@ -51,7 +83,7 @@
     right: 0;
 }
 
-.messages .text .text-details{
+.messages .text .text-details {
     text-align: left;
     display: inline-block;
     padding: 1rem;
@@ -71,7 +103,7 @@
     justify-content: center;
 }
 
-.chat-container .column-4 .message-input{
+.chat-container .column-4 .message-input {
     width: 95%;
     padding: 5px;
     display: flex;
@@ -82,30 +114,32 @@
 .chat-container .column-4 input[type="text"] {
     padding: 10px;
     border: none;
-    border-top-left-radius: 25px;
-    border-bottom-left-radius: 25px;
     border: 1px solid #f2f2f2;
     height: 35px;
-    min-width: 50vh;
+    width: 30rem;
     background-color: #f2f2f2;
     text-align: center;
     margin-bottom: 30px;
 }
 
-.chat-container .column-3 .user{
+
+.chat-container .column-3 .user {
     display: flex;
     gap: 15px;
     align-items: center;
     cursor: pointer;
 }
 
-.chat-container .column-3 .user span{
-    font-family: "Poppins";  
+.chat-container .column-3 .user span {
+    font-family: "Poppins";
     font-weight: bold;
     letter-spacing: 1.5px;
 }
+.column-4 .message-input form{
+    display: flex;
+}
 
-button {
+.column-4 .message-input .btn-submit {
     border: none;
     padding: 10px;
     background-color: #007bff;
@@ -117,4 +151,25 @@ button {
     border-top-right-radius: 25px;
     border-bottom-right-radius: 25px;
     border: 1px solid #007bff;
+}
+
+.column-4 .message-input .btn-attechment {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    width: 50px;
+    height: 36px;
+    border: 1px solid #007bff;
+    margin-bottom: 30px;
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+}
+
+.hidden {
+    display: none;
 }

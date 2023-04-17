@@ -7,12 +7,14 @@ const RouterApi = require('./router/api');
 const jwt = require("jsonwebtoken");
 const ws = require('ws');
 const Message = require('./models/Message')
+const fs = require("fs")
 
 dotenv.config();
 const jwtSecrete = process.env.JWT_SECRET;
 
 const app = express();
 
+app.use('/uploads', express.static(__dirname + '/uploads'))
 app.use(express.json());
 app.use(cookirePareser());
 app.use(cors({
@@ -53,6 +55,22 @@ wss.on('connection', (connection, req) => {
         })
     }
 
+    connection.isAlive = true;
+
+    connection.timer = setInterval(() => {
+        connection.ping();
+        connection.deathTimer = setTimeout(() => {
+            connection.isAlive = false;
+            clearInterval(connection.timer)
+            notifyAboutOnlinePeople();
+            connection.terminate();
+        }, 1000)
+    }, 5000);
+
+    connection.on('pong', () => {
+        clearTimeout(connection.deathTimer);
+    });
+
     const cookies = req.headers.cookie;
     if (cookies) {
         const tokenCookieStr = cookies.split(';').find(str => str.startsWith('token='));
@@ -69,23 +87,36 @@ wss.on('connection', (connection, req) => {
         }
     }
 
-    connection.on('message',async (message) => {
+    connection.on('message', async (message) => {
         const messageData = JSON.parse(message.toString());
-        const { recipient, text } = messageData;
-        if (recipient && text) {
+        const { recipient, text, file } = messageData;
+        let filename = null;
+        if (file) {
+            const parts = file.name.split('.');
+            const ext = parts[parts.length - 1];
+            filename = Date.now() + '.' + ext;
+            const path = __dirname + '/uploads/' + filename;
+            const bufferData = new Buffer(file.data.split(',')[1], 'base64');
+            fs.writeFile(path, bufferData, () => {
+                console.log('file saved:' + path);
+            });
+        }
+        if (recipient && (text || file)) {
             const messageDoc = await Message.create({
                 sender: connection.userId,
                 recipient,
-                text
+                text,
+                file: file ? filename : null,
             });
             [...wss.clients]
                 .filter(client => client.userId == recipient)
-                .forEach(clinet => clinet.send(JSON.stringify({ 
-                    text, 
+                .forEach(clinet => clinet.send(JSON.stringify({
+                    text,
                     sender: connection.userId,
                     recipient,
-                    _id: messageDoc._id
-                 })));
+                    _id: messageDoc._id,
+                    file: file ? filename : null,
+                })));
         }
     })
 

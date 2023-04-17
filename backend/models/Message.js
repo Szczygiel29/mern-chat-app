@@ -10,6 +10,7 @@ const MessageSchema = new mongoose.Schema({
         ref: 'UserChat'
     },
     text: String,
+    file: String,
 }, 
 {
     timestamps: true
