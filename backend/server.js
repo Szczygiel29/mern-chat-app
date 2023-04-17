@@ -6,6 +6,7 @@ const cookirePareser = require('cookie-parser')
 const RouterApi = require('./router/api');
 const jwt = require("jsonwebtoken");
 const ws = require('ws');
+const Message = require('./models/Message')
 
 dotenv.config();
 const jwtSecrete = process.env.JWT_SECRET;
@@ -68,13 +69,23 @@ wss.on('connection', (connection, req) => {
         }
     }
 
-    connection.on('message', (message) => {
+    connection.on('message',async (message) => {
         const messageData = JSON.parse(message.toString());
         const { recipient, text } = messageData;
         if (recipient && text) {
+            const messageDoc = await Message.create({
+                sender: connection.userId,
+                recipient,
+                text
+            });
             [...wss.clients]
                 .filter(client => client.userId == recipient)
-                .forEach(clinet => clinet.send(JSON.stringify({ text, sender: connection.userId })));
+                .forEach(clinet => clinet.send(JSON.stringify({ 
+                    text, 
+                    sender: connection.userId,
+                    recipient,
+                    _id: messageDoc._id
+                 })));
         }
     })
 

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const Message = require('../models/Message')
 const jwt = require("jsonwebtoken");
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
@@ -9,11 +10,36 @@ const bcrypt = require('bcryptjs');
 dotenv.config();
 const bcryptSalt = bcrypt.genSaltSync(10);
 
-router.get('/', (req, res) => {
-  res.json('test')
-});
-
 const jwtSecrete = process.env.JWT_SECRET;
+
+async function getUserDataFromRequsest(req) {
+  return new Promise((resolve, reject) => {
+    const token = req.cookies?.token;
+    if (token) {
+      jwt.verify(token, jwtSecrete, {}, (err, userData) => {
+        if (err) throw err;
+        resolve(userData)
+      })
+    } else {
+      reject('no token')
+    }
+  })
+}
+
+router.get('/messages/:id', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userData = await getUserDataFromRequsest(req);
+    const ourUserId = userData.userId;
+    const messages = await Message.find({
+      sender: {$in: [userId, ourUserId]},
+      recipient: {$in: [userId, ourUserId]},
+    }).sort({createdAt: 1});
+    res.json(messages);
+  } catch (err) {
+    console.log(err)
+  }
+})
 
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -35,14 +61,14 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async (req,res) => {
-  const {username, password} = req.body;
-  const foundUser = await User.findOne({username});
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const foundUser = await User.findOne({ username });
   if (foundUser) {
     const passOk = bcrypt.compareSync(password, foundUser.password);
     if (passOk) {
-      jwt.sign({userId:foundUser._id,username}, jwtSecrete, {}, (err, token) => {
-        res.cookie('token', token, {sameSite:'none', secure:true}).json({
+      jwt.sign({ userId: foundUser._id, username }, jwtSecrete, {}, (err, token) => {
+        res.cookie('token', token, { sameSite: 'none', secure: true }).json({
           id: foundUser._id,
         });
       });
@@ -58,7 +84,7 @@ router.get('/profile', async (req, res) => {
         if (err) throw err;
         res.json(data)
       })
-    }else{
+    } else {
       res.status(401).json('no token');
     }
   } catch (err) {
