@@ -6,9 +6,10 @@ import Avatar from '../Avatar/Avatar'
 import { UserContext } from "../../UserContext"
 import { uniqBy } from 'lodash'
 import axios from 'axios'
-
+import AIChat from '../AIChat/AIChat'
 
 function Chat() {
+    const [showAIChat, setShowAIChat] = useState(false);
     const [ws, setWs] = useState(null);
     const [onlinePeople, setOnlinePeople] = useState({});
     const [offlinePeople, setOfflinePeople] = useState({});
@@ -124,6 +125,10 @@ function Chat() {
         }
     }, [selectedUserId]);
 
+    function handleAIChatClick() {
+        setShowAIChat(prev => !prev);
+    }
+
     const onlinePeopleExclOurUser = { ...onlinePeople };
     delete onlinePeopleExclOurUser[id];
 
@@ -135,12 +140,19 @@ function Chat() {
             <div className="column-3">
                 <div style={{ flexGrow: "1" }}>
                     <h1>ChatWithUs</h1>
+                    <div
+                        className='AI user'
+                        onClick={handleAIChatClick}
+                        style={showAIChat ? { backgroundColor: "rgba(0, 132, 255, 0.235)", borderLeft: "8px solid #007bff" } : {}}>
+                        <Avatar online={true} userName={"AI"} userId={"1111111111159d57f4ff1a3"} />
+                        <h3>I'm AI chat</h3>
+                    </div>
                     {Object.keys(onlinePeopleExclOurUser).map(userId => (
                         <div
                             key={userId}
                             id={userId}
                             className='user'
-                            onClick={() => setSelectedUserId(userId)}
+                            onClick={() => { setSelectedUserId(userId) }}
                             style={userId === selectedUserId ? { backgroundColor: "rgba(0, 132, 255, 0.235)", borderLeft: "8px solid #007bff" } : {}}
                         >
                             <Avatar online={true} userName={onlinePeople[userId]} userId={userId} />
@@ -171,33 +183,34 @@ function Chat() {
             </div>
             <div className="column-4">
                 <div className="messages">
-                    {!selectedUserId && (
+                    {showAIChat ? <AIChat /> : (<>{!selectedUserId && (
                         <div className='no-selected'>&larr; no selected person </div>
                     )}
-                    {!!selectedUserId && (
-                        <div style={{ position: 'relative', height: "100%" }}>
-                            <div className='text'>
-                                {messageWithoutDupes.map(message => (
-                                    <div key={message._id} className='text-separate' style={(message.sender === id ? { textAlign: "right" } : { textAlign: "left" })}>
-                                        <div className='text-details' style={message.sender === id ? { backgroundColor: "#007bff", color: "white" } : { backgroundColor: "#d1d1d1" }}>
-                                            {message.text}
-                                            {message.file && (
-                                                <div>
-                                                    <FontAwesomeIcon icon={faPaperclip} />
-                                                    <a style={{ textDecoration: 'underline', marginLeft: "10px" }} href={axios.defaults.baseURL + '/uploads/' + message.file}>
-                                                        {message.file}
-                                                    </a>
-                                                </div>
-                                            )}
+                        {!!selectedUserId && (
+                            <div style={{ position: 'relative', height: "100%" }}>
+                                <div className='text'>
+                                    {messageWithoutDupes.map(message => (
+                                        <div key={message._id} className='text-separate' style={(message.sender === id ? { textAlign: "right" } : { textAlign: "left" })}>
+                                            <div className='text-details' style={message.sender === id ? { backgroundColor: "#007bff", color: "white" } : { backgroundColor: "#d1d1d1" }}>
+                                                {message.text}
+                                                {message.file && (
+                                                    <div>
+                                                        <FontAwesomeIcon icon={faPaperclip} />
+                                                        <a style={{ textDecoration: 'underline', marginLeft: "10px" }} href={axios.defaults.baseURL + '/uploads/' + message.file}>
+                                                            {message.file}
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                                <div ref={divUnderMessages}></div>
+                                    ))}
+                                    <div ref={divUnderMessages}></div>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </>)}
                 </div>
-                {!!selectedUserId &&
+                {!!selectedUserId && !showAIChat &&
                     (<div className='message-input'>
                         <form onSubmit={sendMessage}>
                             <label type='submit' className='btn-attechment'>

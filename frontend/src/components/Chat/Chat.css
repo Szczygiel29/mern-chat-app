@@ -173,3 +173,17 @@
 .hidden {
     display: none;
 }
+
+.column-3 .AI {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-top: 1px solid #007bff;
+    background-color: #9fc9f73f;
+}
+
+.column-3 .AI h3 {
+    font-family: "Poppins";
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+}
