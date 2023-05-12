@@ -4,7 +4,7 @@ import axios from 'axios';
 import Routes from './Routes';
 
 function App() {
-  axios.defaults.baseURL = 'http://localhost:5000';
+  axios.defaults.baseURL = 'https://chat-app-vfvi.onrender.com';
   axios.defaults.withCredentials = true;
   return (
     <div className="App">
